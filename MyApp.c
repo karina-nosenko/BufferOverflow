@@ -33,6 +33,10 @@ void printUserData(char username[16]) {
   char* delimiter = ",\n\r";
   char* token;
 
+  if(strlen(username) <= 0) {
+    username = "idan";
+  }
+
   FILE *stream = fopen("Data/UserCreditCardData.csv", "r");
 
   while (fgets(line, 50, stream)) {
@@ -84,23 +88,21 @@ int main() {
   char password[16] = {0};
   char username[16] = {0};
 
-  while(1) {
-    printf("Username: ");
-    gets(username);
-    printf("Password: ");
-    gets(password);
+  printf("Username: ");
+  gets(username);
+  printf("Password: ");
+  gets(password);
 
-    if (isUserAuthenticated(username, password)) {
-      userAuthenticated = true;
-    }
-
-    if (userAuthenticated) {
-      printUserData(username);
-    } else {
-      printf("Unauthenticated!\n");
-    }
-
-    printf("\n");
-    userAuthenticated = false;
+  if (isUserAuthenticated(username, password)) {
+    userAuthenticated = true;
   }
+
+  if (userAuthenticated) {
+    printUserData(username);
+  } else {
+    printf("Unauthenticated!\n");
+  }
+
+  printf("\n");
+  userAuthenticated = false;
 }
