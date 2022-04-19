@@ -55,9 +55,9 @@ void printUserData(char username[20]) {
 }
 
 int main() {
-  char username[20] = {0};
-  char password[20] = {0};
   bool userAuthenticated = false;
+  char password[20] = {0};
+  char username[20] = {0};
 
   while(1) {
     printf("Username: ");
