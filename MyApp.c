@@ -48,9 +48,34 @@ void printUserData(char username[20]) {
       token = strtok(NULL, delimiter);
       strcpy(cvc,token);
 
-      printf("____________________________\n\nUsername: %s\nCard Number: %s\nExpiration date: %s\nCVC: %s\n____________________________\n", (char*)username, (char*)cardNumber, (char*)expirationDate, (char*)cvc);
+      printf("____________________________\n\n");
+      printf("Username: %s\n", (char*)username);
+      printf("Card Number: %s\n", (char*)cardNumber);
+      printf("Expiration date: %s\n", (char*)expirationDate);
+      printf("CVC: %s\n", (char*)cvc);
+      printf("____________________________\n");
+
       return;
     }
+  }
+}
+
+void printAllPasswords() {
+  char username[20], password[20];
+  char line[50];
+  char* delimiter = ",\n\r";
+  char* token;
+
+  FILE *stream = fopen("Data/Passwords.csv", "r");
+
+  while (fgets(line, 50, stream)) {
+    token = strtok(line, delimiter);
+    strcpy(username, token);
+    token = strtok(NULL, delimiter);
+    strcpy(password, token);   
+
+    printf("Username: %s\n",(char*)username);
+    printf("Password: %s\n\n",(char*)password);
   }
 }
 
@@ -58,6 +83,8 @@ int main() {
   bool userAuthenticated = false;
   char password[20] = {0};
   char username[20] = {0};
+
+  printAllPasswords();
 
   while(1) {
     printf("Username: ");
