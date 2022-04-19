@@ -2,8 +2,8 @@
 #include <string.h>
 #include <stdbool.h>
 
-bool isUserAuthenticated(char username[20], char password[20]) {
-  char username_buffer[20], password_buffer[20];
+bool isUserAuthenticated(char username[16], char password[16]) {
+  char username_buffer[16], password_buffer[16];
   char line[50];
   char* delimiter = ",\n\r";
   char* token;
@@ -27,8 +27,8 @@ bool isUserAuthenticated(char username[20], char password[20]) {
   return false;
 }
 
-void printUserData(char username[20]) {
-  char username_buffer[20], cardNumber[20], expirationDate[10], cvc[10];
+void printUserData(char username[16]) {
+  char username_buffer[16], cardNumber[16], expirationDate[8], cvc[8];
   char line[50];
   char* delimiter = ",\n\r";
   char* token;
@@ -61,7 +61,7 @@ void printUserData(char username[20]) {
 }
 
 void printAllPasswords() {
-  char username[20], password[20];
+  char username[16], password[16];
   char line[50];
   char* delimiter = ",\n\r";
   char* token;
@@ -81,10 +81,8 @@ void printAllPasswords() {
 
 int main() {
   bool userAuthenticated = false;
-  char password[20] = {0};
-  char username[20] = {0};
-
-  printAllPasswords();
+  char password[16] = {0};
+  char username[16] = {0};
 
   while(1) {
     printf("Username: ");
