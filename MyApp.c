@@ -5,7 +5,7 @@
 bool isUserAuthenticated(char username[20], char password[20]) {
   char username_buffer[20], password_buffer[20];
   char line[50];
-  char* delimiter = ",";
+  char* delimiter = ",\n\r";
   char* token;
 
   FILE *stream = fopen("Data/Passwords.csv", "r");
@@ -16,10 +16,7 @@ bool isUserAuthenticated(char username[20], char password[20]) {
     strcpy(username_buffer,token);
     token = strtok(NULL, delimiter);
     strcpy(password_buffer,token);
-    password_buffer[strlen(password_buffer)-2] = '\0';
-
-    printf("password:[%s], [%s]\n", (char*)password, (char*)password_buffer);
-    printf("Strcmp-Password:%d\n",strcmp(password, password_buffer));
+    //password_buffer[strlen(password_buffer)-2] = '\0';
 
     if((strcmp(username, username_buffer) == 0) && (strcmp(password, password_buffer) == 0)) {
       fclose(stream);
@@ -32,7 +29,7 @@ bool isUserAuthenticated(char username[20], char password[20]) {
 }
 
 void printUserData(char username[20]) {
-  printf("Authenticated!");
+  printf("Authenticated!\n");
 }
 
 int main() {
