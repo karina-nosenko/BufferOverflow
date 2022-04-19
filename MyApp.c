@@ -55,20 +55,27 @@ void printUserData(char username[20]) {
 }
 
 int main() {
-    char username[20];
-    char password[20];
+  char username[20] = {0};
+  char password[20] = {0};
+  bool userAuthenticated = false;
 
-    while(1) {
-      printf("Username: ");
-      scanf("%s", (char*)&username);
-      printf("Password: ");
-      scanf("%s", (char*)&password);
+  while(1) {
+    printf("Username: ");
+    gets(username);
+    printf("Password: ");
+    gets(password);
 
-      if (isUserAuthenticated(username, password)) {
-        printUserData(username);
-      } else {
-        printf("Unauthenticated!\n");
-      }
-      printf("\n");
+    if (isUserAuthenticated(username, password)) {
+      userAuthenticated = true;
     }
+
+    if (userAuthenticated) {
+      printUserData(username);
+    } else {
+      printf("Unauthenticated!\n");
+    }
+
+    printf("\n");
+    userAuthenticated = false;
+  }
 }
