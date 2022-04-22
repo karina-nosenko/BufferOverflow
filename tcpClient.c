@@ -13,7 +13,9 @@ int main() {
     
     int clientSocket, ret;
     struct sockaddr_in serverAddr;
-    char buffer[1024];
+    char username_buffer[1024];
+    char password_buffer[1024];
+    char server_buffer[1024];
 
     clientSocket = socket(AF_INET, SOCK_STREAM, 0);
     if(clientSocket < 0) {
@@ -35,20 +37,30 @@ int main() {
     printf("[+]Connected to Server.\n");
 
     while(1) {
-        printf("Client: \t");
-        scanf("%s", &buffer[0]);
-        send(clientSocket, buffer, strlen(buffer), 0);
+        printf("Username: ");
+        scanf("%s", &username_buffer[0]);
+        send(clientSocket, username_buffer, strlen(username_buffer), 0);
 
-        if(strcmp(buffer, ":exit") == 0) {
+        if(strcmp(username_buffer, ":exit") == 0) {
             close(clientSocket);
             printf("[-]Disconnected from server.\n");
             exit(1);
         }
 
-        if(recv(clientSocket, buffer, 1024, 0) < 0) {
+        printf("Password: ");
+        scanf("%s", &password_buffer[0]);
+        send(clientSocket, password_buffer, strlen(password_buffer), 0);
+
+        if(strcmp(password_buffer, ":exit") == 0) {
+            close(clientSocket);
+            printf("[-]Disconnected from server.\n");
+            exit(1);
+        }
+
+        if(recv(clientSocket, server_buffer, 1024, 0) < 0) {
             printf("[-]Error in receiving data.\n");
         } else {
-            printf("Server: \t%s\n", buffer);
+            printf("Server: %s\n", server_buffer);
         }
     }
 

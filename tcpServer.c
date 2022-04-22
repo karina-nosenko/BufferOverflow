@@ -45,7 +45,10 @@ int main() {
 
     socklen_t addr_size;
 
-    char buffer[1024];
+    int buffer_size;
+    char username_buffer[1024];
+    char password_buffer[1024];
+    char server_buffer[1024];
     pid_t childpid;
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -84,16 +87,26 @@ int main() {
             close(sockfd);
 
             while(1) {
-                int size = recv(newSocket, buffer, 1024, 0);
-                buffer[size] = '\0';
-                if(strcmp(buffer, ":exit") == 0) {
+                buffer_size = recv(newSocket, username_buffer, 1024, 0);
+                username_buffer[buffer_size] = '\0';
+                if(strcmp(username_buffer, ":exit") == 0) {
                     printf("Disconnected from %s:%d\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
-                    break;
-                } else {
-                    printf("Client: %s\n", buffer);
-                    send(newSocket, buffer, strlen(buffer), 0);
-                    bzero(buffer, sizeof(buffer));
+                    exit(1);
                 }
+                printf("Username: %s\n", username_buffer);
+
+                buffer_size = recv(newSocket, password_buffer, 1024, 0);
+                password_buffer[buffer_size] = '\0';
+                if(strcmp(password_buffer, ":exit") == 0) {
+                    printf("Disconnected from %s:%d\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
+                    exit(1);
+                }
+                printf("Password: %s\n", password_buffer);
+
+                send(newSocket, password_buffer, strlen(password_buffer), 0);
+
+                bzero(username_buffer, sizeof(username_buffer));
+                bzero(password_buffer, sizeof(password_buffer));              
             }
         }
     }
