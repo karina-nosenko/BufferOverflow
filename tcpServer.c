@@ -10,6 +10,21 @@
 
 #define PORT 4444
 
+bool password_compare(char* real, char* submitted) {
+    for(int i=0; i<strlen(real); i++) {
+        if(*real++ != *submitted++) {
+            return false;
+        }
+
+        sleep(1);
+
+        if(!submitted) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool isUserAuthenticated(char username[16], char password[16]) {
   char username_buffer[16], password_buffer[16];
   char line[50];
@@ -25,7 +40,7 @@ bool isUserAuthenticated(char username[16], char password[16]) {
     token = strtok(NULL, delimiter);
     strcpy(password_buffer,token);
 
-    if((strcmp(username, username_buffer) == 0) && (strcmp(password, password_buffer) == 0)) {
+    if((strcmp(username, username_buffer) == 0) && (password_compare(password_buffer, password) > 0)) {
       fclose(stream);
       return true;
     }
@@ -45,10 +60,12 @@ int main() {
 
     socklen_t addr_size;
 
+    bool userAuthenticated = false;
     int buffer_size;
     char username_buffer[1024];
     char password_buffer[1024];
     char server_buffer[1024];
+    char* msg;
     pid_t childpid;
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -103,10 +120,17 @@ int main() {
                 }
                 printf("Password: %s\n", password_buffer);
 
-                send(newSocket, password_buffer, strlen(password_buffer), 0);
+                if(isUserAuthenticated(username_buffer, password_buffer)) {
+                    memcpy(server_buffer, "Authenticated", strlen("Authenticated"));
+                } else {
+                    memcpy(server_buffer, "Unauthenticated", strlen("Unauthenticated")+1);
+                }
 
+                send(newSocket, server_buffer, strlen(server_buffer), 0);
+
+                bzero(server_buffer, sizeof(server_buffer)); 
                 bzero(username_buffer, sizeof(username_buffer));
-                bzero(password_buffer, sizeof(password_buffer));              
+                bzero(password_buffer, sizeof(password_buffer));                 
             }
         }
     }
