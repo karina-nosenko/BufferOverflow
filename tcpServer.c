@@ -6,8 +6,34 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <stdbool.h>
 
 #define PORT 4444
+
+bool isUserAuthenticated(char username[16], char password[16]) {
+  char username_buffer[16], password_buffer[16];
+  char line[50];
+  char* delimiter = ",\n\r";
+  char* token;
+
+  FILE *stream = fopen("Data/Passwords.csv", "r");
+
+  while (fgets(line, 50, stream)) {
+    token = strtok(line, delimiter);
+
+    strcpy(username_buffer,token);
+    token = strtok(NULL, delimiter);
+    strcpy(password_buffer,token);
+
+    if((strcmp(username, username_buffer) == 0) && (strcmp(password, password_buffer) == 0)) {
+      fclose(stream);
+      return true;
+    }
+  }
+
+  fclose(stream);
+  return false;
+}
 
 int main() {
 
