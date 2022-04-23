@@ -6,45 +6,68 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <stdbool.h>
 
 #define PORT 4444
 
-void chatWithServer(int clientSocket) {
-    
-    char username_buffer[1024];
-    char password_buffer[1024];
+// char characters[] = {
+//     'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 
+//     'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i',
+//     'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm',
+//     'Q', 'W', 'E', 'R', 'T', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 
+//     'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i',
+//     'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm',       
+// }
+
+char* discoverPassword(int clientSocket, char* username) {
+
+    char* password_buffer = "";
     char server_buffer[1024];
+    bool passwordDiscovered = false;
+
+    send(clientSocket, username, strlen(username), 0);
+
+    if(strcmp(username, ":exit") == 0) {
+        close(clientSocket);
+        printf("[-]Disconnected from server.\n");
+        exit(1);
+    }
+
+    while(!passwordDiscovered) {
+        send(clientSocket, password_buffer, strlen(password_buffer), 0);
+
+        if(recv(clientSocket, server_buffer, 1024, 0) < 0) {
+            printf("[-]Error in receiving data.\n");
+            exit(1);
+        }
+
+        if(strcmp(server_buffer, "Authenticated") == 0) {
+            break;
+        }
+        
+        // find the next combination
+        
+
+        bzero(server_buffer, sizeof(server_buffer)); 
+        bzero(password_buffer, sizeof(password_buffer)); 
+    }
+    
+    return password_buffer;
+}
+
+void chatWithServer(int clientSocket) {
+
+    char username_buffer[1024];
+    char* password;
 
     while(1) {
         printf("Username: ");
         scanf("%s", &username_buffer[0]);
-        send(clientSocket, username_buffer, strlen(username_buffer), 0);
+        
+        password = discoverPassword(clientSocket, username_buffer);
+        printf("Success! The password is: %s", password);
 
-        if(strcmp(username_buffer, ":exit") == 0) {
-            close(clientSocket);
-            printf("[-]Disconnected from server.\n");
-            exit(1);
-        }
-
-        printf("Password: ");
-        scanf("%s", &password_buffer[0]);
-        send(clientSocket, password_buffer, strlen(password_buffer), 0);
-
-        if(strcmp(password_buffer, ":exit") == 0) {
-            close(clientSocket);
-            printf("[-]Disconnected from server.\n");
-            exit(1);
-        }
-
-        if(recv(clientSocket, server_buffer, 1024, 0) < 0) {
-            printf("[-]Error in receiving data.\n");
-        } else {
-            printf("Server: %s\n", server_buffer);
-        }
-
-        bzero(server_buffer, sizeof(server_buffer)); 
         bzero(username_buffer, sizeof(username_buffer));
-        bzero(password_buffer, sizeof(password_buffer)); 
     }
 }
 
