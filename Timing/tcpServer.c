@@ -58,6 +58,7 @@ void chatWithClient(int newSocket, struct sockaddr_in newAddr) {
     int buffer_size;
 
     while(1) {
+        // Receive username from client
         buffer_size = recv(newSocket, username_buffer, 1024, 0);
         username_buffer[buffer_size] = '\0';
         if(strcmp(username_buffer, ":exit") == 0) {
@@ -66,6 +67,7 @@ void chatWithClient(int newSocket, struct sockaddr_in newAddr) {
         }
         printf("Username: %s\n", username_buffer);
 
+        // Receive password from client
         buffer_size = recv(newSocket, password_buffer, 1024, 0);
         password_buffer[buffer_size] = '\0';
         if(strcmp(password_buffer, ":exit") == 0) {
@@ -74,6 +76,7 @@ void chatWithClient(int newSocket, struct sockaddr_in newAddr) {
         }
         printf("Password: %s\n", password_buffer);
 
+        // Send response to client
         if(isUserAuthenticated(username_buffer, password_buffer)) {
             memcpy(server_buffer, "Authenticated", strlen("Authenticated"));
         } else {
@@ -82,6 +85,7 @@ void chatWithClient(int newSocket, struct sockaddr_in newAddr) {
 
         send(newSocket, server_buffer, strlen(server_buffer), 0);
 
+        // Clear buffers
         bzero(server_buffer, sizeof(server_buffer)); 
         bzero(username_buffer, sizeof(username_buffer));
         bzero(password_buffer, sizeof(password_buffer));                 
@@ -131,6 +135,7 @@ int main() {
         }
         printf("Connection accepted from %s:%d\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
 
+        // Create process to the new connected client
         if((childpid = fork()) == 0) {
             close(sockfd);
 

