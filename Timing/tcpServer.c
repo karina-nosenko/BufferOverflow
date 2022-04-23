@@ -123,7 +123,7 @@ int main() {
                 if(isUserAuthenticated(username_buffer, password_buffer)) {
                     memcpy(server_buffer, "Authenticated", strlen("Authenticated"));
                 } else {
-                    memcpy(server_buffer, "Unauthenticated", strlen("Unauthenticated")+1);
+                    memcpy(server_buffer, "Unauthenticated", strlen("Unauthenticated"));
                 }
 
                 send(newSocket, server_buffer, strlen(server_buffer), 0);

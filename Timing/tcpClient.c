@@ -62,6 +62,10 @@ int main() {
         } else {
             printf("Server: %s\n", server_buffer);
         }
+
+        bzero(server_buffer, sizeof(server_buffer)); 
+        bzero(username_buffer, sizeof(username_buffer));
+        bzero(password_buffer, sizeof(password_buffer)); 
     }
 
     return 0;
