@@ -9,32 +9,11 @@
 
 #define PORT 4444
 
-int main() {
+void chatWithServer(int clientSocket) {
     
-    int clientSocket, ret;
-    struct sockaddr_in serverAddr;
     char username_buffer[1024];
     char password_buffer[1024];
     char server_buffer[1024];
-
-    clientSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if(clientSocket < 0) {
-        printf("[-]Error in connection.\n");
-        exit(1);
-    }
-    printf("[+]Client Socket is created\n");
-
-    memset(&serverAddr, '\0', sizeof(serverAddr));
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(PORT);
-    serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-
-    ret = connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
-    if(ret < 0) {
-        printf("[-]Error in connection.\n");
-        exit(1);
-    }
-    printf("[+]Connected to Server.\n");
 
     while(1) {
         printf("Username: ");
@@ -67,6 +46,33 @@ int main() {
         bzero(username_buffer, sizeof(username_buffer));
         bzero(password_buffer, sizeof(password_buffer)); 
     }
+}
+
+int main() {
+
+    int clientSocket, ret;
+    struct sockaddr_in serverAddr;
+
+    clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if(clientSocket < 0) {
+        printf("[-]Error in connection.\n");
+        exit(1);
+    }
+    printf("[+]Client Socket is created\n");
+
+    memset(&serverAddr, '\0', sizeof(serverAddr));
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(PORT);
+    serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    ret = connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
+    if(ret < 0) {
+        printf("[-]Error in connection.\n");
+        exit(1);
+    }
+    printf("[+]Connected to Server.\n");  
+
+    chatWithServer(clientSocket);
 
     return 0;
 }

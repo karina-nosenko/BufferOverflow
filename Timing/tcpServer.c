@@ -50,6 +50,44 @@ bool isUserAuthenticated(char username[16], char password[16]) {
   return false;
 }
 
+void chatWithClient(int newSocket, struct sockaddr_in newAddr) {
+    char username_buffer[1024];
+    char password_buffer[1024];
+    char server_buffer[1024];
+    bool userAuthenticated = false;
+    int buffer_size;
+
+    while(1) {
+        buffer_size = recv(newSocket, username_buffer, 1024, 0);
+        username_buffer[buffer_size] = '\0';
+        if(strcmp(username_buffer, ":exit") == 0) {
+            printf("Disconnected from %s:%d\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
+            return;
+        }
+        printf("Username: %s\n", username_buffer);
+
+        buffer_size = recv(newSocket, password_buffer, 1024, 0);
+        password_buffer[buffer_size] = '\0';
+        if(strcmp(password_buffer, ":exit") == 0) {
+            printf("Disconnected from %s:%d\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
+            return;
+        }
+        printf("Password: %s\n", password_buffer);
+
+        if(isUserAuthenticated(username_buffer, password_buffer)) {
+            memcpy(server_buffer, "Authenticated", strlen("Authenticated"));
+        } else {
+            memcpy(server_buffer, "Unauthenticated", strlen("Unauthenticated"));
+        }
+
+        send(newSocket, server_buffer, strlen(server_buffer), 0);
+
+        bzero(server_buffer, sizeof(server_buffer)); 
+        bzero(username_buffer, sizeof(username_buffer));
+        bzero(password_buffer, sizeof(password_buffer));                 
+    }
+}
+
 int main() {
 
     int sockfd, ret;
@@ -59,13 +97,6 @@ int main() {
     struct sockaddr_in newAddr;
 
     socklen_t addr_size;
-
-    bool userAuthenticated = false;
-    int buffer_size;
-    char username_buffer[1024];
-    char password_buffer[1024];
-    char server_buffer[1024];
-    char* msg;
     pid_t childpid;
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -103,35 +134,7 @@ int main() {
         if((childpid = fork()) == 0) {
             close(sockfd);
 
-            while(1) {
-                buffer_size = recv(newSocket, username_buffer, 1024, 0);
-                username_buffer[buffer_size] = '\0';
-                if(strcmp(username_buffer, ":exit") == 0) {
-                    printf("Disconnected from %s:%d\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
-                    exit(1);
-                }
-                printf("Username: %s\n", username_buffer);
-
-                buffer_size = recv(newSocket, password_buffer, 1024, 0);
-                password_buffer[buffer_size] = '\0';
-                if(strcmp(password_buffer, ":exit") == 0) {
-                    printf("Disconnected from %s:%d\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
-                    exit(1);
-                }
-                printf("Password: %s\n", password_buffer);
-
-                if(isUserAuthenticated(username_buffer, password_buffer)) {
-                    memcpy(server_buffer, "Authenticated", strlen("Authenticated"));
-                } else {
-                    memcpy(server_buffer, "Unauthenticated", strlen("Unauthenticated"));
-                }
-
-                send(newSocket, server_buffer, strlen(server_buffer), 0);
-
-                bzero(server_buffer, sizeof(server_buffer)); 
-                bzero(username_buffer, sizeof(username_buffer));
-                bzero(password_buffer, sizeof(password_buffer));                 
-            }
+            chatWithClient(newSocket, newAddr);
         }
     }
     
