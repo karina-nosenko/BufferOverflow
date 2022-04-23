@@ -11,22 +11,24 @@
 #define PORT 4444
 
 bool password_compare(char* real, char* submitted) {
-    for(int i=0; i<strlen(real); i++) {
+    int real_len = strlen(real), submitted_len = strlen(submitted);
+
+    for(int i=0; i<real_len; i++) {
         if(*real++ != *submitted++) {
             return false;
         }
 
-        sleep(1);
+        usleep(50 * 1000); // Wait 50ms
 
-        if(!submitted) {
+        if(i > submitted_len) {
             return false;
         }
     }
     return true;
 }
 
-bool isUserAuthenticated(char username[16], char password[16]) {
-  char username_buffer[16], password_buffer[16];
+bool isUserAuthenticated(char username[1024], char password[1024]) {
+  char username_buffer[1024], password_buffer[1024];
   char line[50];
   char* delimiter = ",\n\r";
   char* token;
@@ -45,7 +47,9 @@ bool isUserAuthenticated(char username[16], char password[16]) {
       return true;
     }
   }
-
+  
+  bzero(password_buffer, sizeof(password_buffer)); 
+  bzero(username_buffer, sizeof(username_buffer)); 
   fclose(stream);
   return false;
 }
